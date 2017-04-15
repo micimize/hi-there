@@ -20,7 +20,10 @@ def shuffle_string(string):
     return ''.join(l)
 
 class AlphabetScramble:
-    """A simple example class"""
+    """
+    Given a set of acceptable phrases and a rejection statement
+    Bundles all utilities necessary for generating test data
+    """
 
     def random_letter(self):
         return random.choice(self.alphabet)
