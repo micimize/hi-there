@@ -4,44 +4,47 @@ Stub file
 from alphabet_scramble import AlphabetScramble
 from tensor_translator import TensorTranslator
 import tensorflow as tf
+import numpy as np
 
 scramble = AlphabetScramble([
-        'hi',
-        'hello',
-        'well hi',
-        'well hello',
-        'hi there',
-        'hello there',
-        'well hi there',
-        'well hello there' ])
+        'hi              ',
+        'hello           ',
+        'well hi         ',
+        'well hello      ',
+        'hi there        ',
+        'hello there     ',
+        'well hi there   ',
+        'well hello there'],
+        rejection=
+        'reeeeeeeeeeeeeee')
 
 translator = TensorTranslator(scramble.alphabet)
 
+def training_data(samples=100):
+    inputs = []
+    outputs = []
+    for input, output in [scramble.scramble() for i in range(samples)]:
+        inputs.append(translator.to_tensor(input))
+        outputs.append(output) #translator.to_tensor(output))
+    return { 'phrase': np.array(inputs) }, np.array(outputs)
 
-# Declare list of features, we only have one real-valued feature
-def model(features, labels, mode):
-  # Build a linear model and predict values
-  W = tf.get_variable('W', [1], dtype=tf.float64)
-  b = tf.get_variable('b', [1], dtype=tf.float64)
-  y = W*features['x'] + b
-  # Loss sub-graph
-  loss = tf.reduce_sum(tf.square(y - labels))
-  # Training sub-graph
-  global_step = tf.train.get_global_step()
-  optimizer = tf.train.GradientDescentOptimizer(0.01)
-  train = tf.group(optimizer.minimize(loss),
-                   tf.assign_add(global_step, 1))
-  # ModelFnOps connects subgraphs we built to the
-  # appropriate functionality.
-  return tf.contrib.learn.ModelFnOps(
-      mode=mode, predictions=y,
-      loss=loss,
-      train_op=train)
+def training_fn(samples=100, num_epochs=10):
+    inputs, outputs = training_data(samples)
+    return tf.contrib.learn.io.numpy_input_fn(
+            inputs,
+            y=outputs,
+            num_epochs=num_epochs)
 
-estimator = tf.contrib.learn.Estimator(model_fn=model)
-input_fn = tf.contrib.learn.io.numpy_input_fn({'x': x}, y, 4, num_epochs=1000)
+def regressor_model():
+    return tf.contrib.learn.LinearRegressor(feature_columns=[
+        tf.contrib.layers.real_valued_column('phrase', dimension=2) ])
 
-# train
-estimator.fit(input_fn=input_fn, steps=1000)
-# evaluate our model
-print(estimator.evaluate(input_fn=input_fn, steps=10))
+def train(model, *args):
+    model.fit(input_fn=training_fn(*args), steps=100)
+    return model
+
+def evaluate(model, *args):
+    return model.evaluate(input_fn=training_fn(*args), steps=1)
+
+if __name__ == '__main__':
+    print( evaluate( train( regressor_model() ) ) )

@@ -31,7 +31,7 @@ class AlphabetScramble:
     def random_scramble(self):
         return ''.join([
             self.random_letter()
-            for i in range(random.randint(1, self._max_phrase_length))
+            for i in range(self._max_phrase_length) #random.randint(1, self._max_phrase_length))
         ])
 
     def solve(self, phrase, reject=False):
@@ -43,18 +43,18 @@ class AlphabetScramble:
         phrase = self.random_scramble()
         while self.solve(phrase):
             phrase = self.random_scramble()
-        return phrase, self.rejection
+        return phrase, len(self.alphabet) #self.rejection
 
     def valid_scramble(self):
-        phrase = random.choice(self.phrases)
-        return shuffle_string(phrase), phrase
+        index = random.randint(0, len(self.phrases) - 1)
+        return shuffle_string(self.phrases[index]), index
 
-    def training_set(self, valid=100, invalid=100):
-        return dict([
-            *[self.valid_scramble() for i in range(valid)],
-            *[self.invalid_scramble() for i in range(invalid)] ])
+    def scramble(self):
+        return random.choice([
+            self.invalid_scramble,
+            self.valid_scramble ])()
 
-    def __init__(self, phrases, rejection='Fuck you!'):
+    def __init__(self, phrases, rejection=''):
         self.phrases = phrases
         self.alphabet = alphabet(phrases)
         self.rejection = rejection
