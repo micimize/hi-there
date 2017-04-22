@@ -28,7 +28,7 @@ def training_data(samples=100):
         outputs.append(output) #translator.to_tensor(output))
     return { 'phrase': np.array(inputs) }, np.array(outputs)
 
-def training_fn(samples=1000, num_epochs=1000):
+def training_fn(samples=100, num_epochs=10):
     inputs, outputs = training_data(samples)
     return tf.contrib.learn.io.numpy_input_fn(
             inputs,
@@ -37,10 +37,10 @@ def training_fn(samples=1000, num_epochs=1000):
 
 def regressor_model():
     return tf.contrib.learn.LinearRegressor(feature_columns=[
-        tf.contrib.layers.real_valued_column('phrase', dimension=1) ])
+        tf.contrib.layers.real_valued_column('phrase', dimension=2) ])
 
 def train(model, *args):
-    model.fit(input_fn=training_fn(*args), steps=1000)
+    model.fit(input_fn=training_fn(*args), steps=100)
     return model
 
 def evaluate(model, *args):
