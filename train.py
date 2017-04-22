@@ -2,7 +2,7 @@
 Stub file
 '''
 from alphabet_scramble import AlphabetScramble
-from tensor_translator import TensorTranslator
+from one_hot_translator import TensorTranslator
 import tensorflow as tf
 import numpy as np
 
@@ -39,12 +39,19 @@ def regressor_model():
     return tf.contrib.learn.LinearRegressor(feature_columns=[
         tf.contrib.layers.real_valued_column('phrase', dimension=2) ])
 
-def train(model, *args):
-    model.fit(input_fn=training_fn(*args), steps=100)
+def train(model, steps=100, **kwargs):
+    model.fit(input_fn=training_fn(**kwargs), steps=steps)
     return model
 
-def evaluate(model, *args):
-    return model.evaluate(input_fn=training_fn(*args), steps=1)
+def evaluate(model, steps, **kwargs):
+    return model.evaluate(input_fn=training_fn(**kwargs), steps=steps)
+
+def fractional_values(dictionary, fraction=10):
+    return { k: int(v / 10) for k, v in dictionary.items() }
 
 if __name__ == '__main__':
-    print( evaluate( train( regressor_model() ) ) )
+    params = dict(steps=100000, samples=10000, num_epochs=100000)
+    model = train( regressor_model(), **params)
+    performance = evaluate( model, **fractional_values(params, 10))
+    print(performance, params)
+
