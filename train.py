@@ -2,7 +2,7 @@
 Stub file
 '''
 from alphabet_scramble import AlphabetScramble
-from one_hot_translator import TensorTranslator
+from translators.one_hot_vector import TensorTranslator
 import tensorflow as tf
 import numpy as np
 
@@ -37,7 +37,10 @@ def training_fn(samples=100, num_epochs=10):
 
 def regressor_model():
     return tf.contrib.learn.LinearRegressor(feature_columns=[
-        tf.contrib.layers.real_valued_column('phrase', dimension=2) ])
+        tf.contrib.layers.real_valued_column('phrase', dimension=16) ])
+
+def cluster_model():
+    return tf.contrib.learn.KMeansClustering(len(scramble.alphabet) + 1)
 
 def train(model, steps=100, **kwargs):
     model.fit(input_fn=training_fn(**kwargs), steps=steps)
@@ -50,8 +53,8 @@ def fractional_values(dictionary, fraction=10):
     return { k: int(v / 10) for k, v in dictionary.items() }
 
 if __name__ == '__main__':
-    params = dict(steps=100000, samples=10000, num_epochs=100000)
-    model = train( regressor_model(), **params)
+    params = dict(steps=10000, samples=10000, num_epochs=100000)
+    model = train( cluster_model(), **params)
     performance = evaluate( model, **fractional_values(params, 10))
     print(performance, params)
 
